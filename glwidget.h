@@ -9,6 +9,11 @@ class GLWidget : public QGLWidget
     Q_OBJECT
 public:
     explicit GLWidget(QWidget *parent = 0);
+    void setScalePercent(int percent);
+    void setHeightPercent(int percent);
+    void setDiameterPercent(int percent);
+    void setApproximationPercent(int percent);
+    void setPolyFillState(bool status);
 
 protected:
     void initializeGL();
@@ -21,11 +26,17 @@ protected:
 
 
 private:
-    int xRotation, yRotation, zRotation, scale;
+    int xRotation, yRotation, zRotation;
+    bool polyFillStatus;
     QPoint mousePos;
+    qreal scale;
     qreal currentScale;
-    qreal Approximation;
+    int Approximation;
     qreal functionLen;
+    qreal heightParam;
+    qreal getFunctionValue(qreal x);
+    QVector3D getVector(qreal pos_in, qreal angle);
+    QVector3D getNormalZero(qreal pos_in);
 
     void drawAxis();
     void drawParaboloide();

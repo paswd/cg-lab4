@@ -8,6 +8,16 @@
 const double LARGE_SIDE = 1.6;
 const qreal GL_PI = 3.1415926;
 
+//scale height diameter approximation
+const qreal SCALE_MIN = .2;
+const qreal SCALE_MAX = 3.;
+const qreal HEIGHT_MIN = .5;
+const qreal HEIGHT_MAX = 20.;
+const qreal DIAMETER_MIN = 1;
+const qreal DIAMETER_MAX = 5;
+const int APPROXIMATION_MIN = 4.;
+const int APPROXIMATION_MAX = 60.;
+
 GLWidget::GLWidget(QWidget *parent) :
     QGLWidget(parent)
 {
@@ -16,13 +26,15 @@ GLWidget::GLWidget(QWidget *parent) :
     yRotation = 0;
     zRotation = 0;
     scale = 2;
-    Approximation = 30.;
+    Approximation = 5;
     functionLen = 4;
+    heightParam = 5.;
 }
 
 void GLWidget::initializeGL() {
     qglClearColor(Qt::white);
     glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_LIGHTING);
     glShadeModel(GL_FLAT);
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
@@ -55,6 +67,44 @@ void GLWidget::mouseMoveEvent(QMouseEvent* pe)
 
 void GLWidget::mouseReleaseEvent(QMouseEvent *pe)
 {
+}
+
+void GLWidget::setScalePercent(int percent) {
+    qreal diff = SCALE_MAX - SCALE_MIN;
+    qreal one_perc = diff / 100;
+    scale = SCALE_MIN + one_perc * percent;
+
+    updateGL();
+}
+
+void GLWidget::setHeightPercent(int percent) {
+    qreal diff = HEIGHT_MAX - HEIGHT_MIN;
+    qreal one_perc = diff / 100;
+    heightParam = HEIGHT_MIN + one_perc * percent;
+
+    updateGL();
+}
+
+void GLWidget::setDiameterPercent(int percent) {
+    qreal diff = DIAMETER_MAX - DIAMETER_MIN;
+    qreal one_perc = diff / 100;
+    functionLen = DIAMETER_MIN + one_perc * percent;
+
+    updateGL();
+}
+
+void GLWidget::setApproximationPercent(int percent) {
+    qreal diff = APPROXIMATION_MAX - APPROXIMATION_MIN;
+    qreal one_perc = diff / 100;
+    Approximation = APPROXIMATION_MIN + one_perc * percent;
+
+    updateGL();
+}
+
+void GLWidget::setPolyFillState(bool status) {
+    polyFillStatus = status;
+
+    updateGL();
 }
 
 void GLWidget::drawAxis()
@@ -124,18 +174,18 @@ void GLWidget::wheelEvent(QWheelEvent* pe)
     }
 }*/
 
-qreal getFunctionValue(qreal x) {
-    return 10 * x * x;
+qreal GLWidget::getFunctionValue(qreal x) {
+    return heightParam * x * x;
 }
 
-QVector3D getVector(qreal pos_in, qreal angle) {
+QVector3D GLWidget::getVector(qreal pos_in, qreal angle) {
     qreal pos = pos_in * .1;
 
     QVector3D res(pos * qCos(angle), pos * qSin(angle), getFunctionValue(pos));
 
     return res;
 }
-QVector3D getNormalZero(qreal pos_in) {
+QVector3D GLWidget::getNormalZero(qreal pos_in) {
     qreal pos = pos_in * .1;
     QVector3D res(0., 0., getFunctionValue(pos));
 
@@ -171,8 +221,11 @@ void GLWidget::drawParaboloide() {
     for (qreal current = 0.; current < 2. * GL_PI; current += stepRotate) {
         qreal i;
         for (i = 0.; i < halfLen; i += stepFunction) {
-            glBegin(GL_LINE_LOOP);
-            //glBegin(GL_POLYGON);
+            if (!polyFillStatus) {
+                glBegin(GL_LINE_LOOP);
+            } else {
+                glBegin(GL_POLYGON);
+            }
             qDebug() << current << " " << i;
             QVector3D currentPoly[4];
             currentPoly[3] = getVector(i, current);
@@ -189,8 +242,11 @@ void GLWidget::drawParaboloide() {
         topPoly[0] = getNormalZero(i);
         topPoly[1] = getVector(i, current);
         topPoly[2] = getVector(i, current + stepRotate);
-        glBegin(GL_LINE_LOOP);
-        //glBegin(GL_POLYGON);
+        if (!polyFillStatus) {
+            glBegin(GL_LINE_LOOP);
+        } else {
+            glBegin(GL_POLYGON);
+        }
         glVertex3f(topPoly[0].x(), topPoly[0].y(), topPoly[0].z());
         glVertex3f(topPoly[1].x(), topPoly[1].y(), topPoly[1].z());
         glVertex3f(topPoly[2].x(), topPoly[2].y(), topPoly[2].z());
