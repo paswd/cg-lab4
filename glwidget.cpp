@@ -38,6 +38,9 @@ void GLWidget::initializeGL() {
     glShadeModel(GL_FLAT);
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //fillCoordinateMatrix();
 }
 
@@ -204,7 +207,8 @@ void GLWidget::drawParaboloide() {
     glRotatef(zRotation, 0.0f, 0.0f, 1.0f);
     float ambient[4] = {0.5, 0.5, 0.5, 1};
 
-    QColor clr(0, 64, 128, 255);
+    QColor clr(0, 64, 128, (int) qAbs(255 * qCos(currentTimeValue)));
+    //QColor clr(0, 64, 128, 127);
     //QColor clr_lines(0, 0, 0, 255);
     qglColor(clr);
 
@@ -257,4 +261,14 @@ void GLWidget::drawParaboloide() {
     }
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambient);
 
+}
+
+void GLWidget::animationRealize(void) {
+    currentTimeValue += .2;
+    updateGL();
+}
+
+void GLWidget::animationClear(void) {
+    currentTimeValue = 0.;
+    updateGL();
 }

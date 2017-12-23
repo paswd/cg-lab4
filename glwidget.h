@@ -14,6 +14,8 @@ public:
     void setDiameterPercent(int percent);
     void setApproximationPercent(int percent);
     void setPolyFillState(bool status);
+    void animationRealize(void);
+    void animationClear(void);
 
 protected:
     void initializeGL();
@@ -26,6 +28,7 @@ protected:
 
 
 private:
+    qreal currentTimeValue;
     int xRotation, yRotation, zRotation;
     bool polyFillStatus;
     QPoint mousePos;
