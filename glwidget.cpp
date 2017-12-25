@@ -17,6 +17,8 @@ const qreal DIAMETER_MIN = 1;
 const qreal DIAMETER_MAX = 5;
 const int APPROXIMATION_MIN = 4.;
 const int APPROXIMATION_MAX = 60.;
+const qreal LIGHT_MIN = .5;
+const qreal LIGHT_MAX = 5.;
 
 GLWidget::GLWidget(QWidget *parent) :
     QGLWidget(parent)
@@ -35,18 +37,41 @@ void GLWidget::initializeGL() {
     qglClearColor(Qt::white);
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_LIGHTING);
+    //glEnable(GL_LIGHT0);
     glShadeModel(GL_FLAT);
     glEnable(GL_CULL_FACE);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
 
     glEnable (GL_BLEND);
+    //glEnable(GL_DIFFUSE);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //fillCoordinateMatrix();
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+    glEnable(GL_NORMALIZE);
 }
 
 void GLWidget::paintGL() {
     //drawPiramide();
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW);
+
+    float ambience[4] = {0.3f, 0.3f, 0.3f, 1.0};//СѓСЃС‚Р°РЅРѕРІРєР° "РјРёСЂРѕРІРѕРіРѕ" СЃРІРµС‚Р°, РєРѕРіРґР° РјС‹ РЅРµ Р·Р°РґР°РµРј РґСЂСѓРіРѕРµ РѕСЃРІРµС‰РµРЅРёРµ
+    glLightfv( GL_LIGHT0, GL_AMBIENT,  ambience);
+    GLfloat light0_diffuse[] = {lightIntensity, lightIntensity, lightIntensity};
+    GLfloat light0_direction[] = {lightIntensity, lightIntensity, 0.};
+
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_direction);
+
     drawParaboloide();
+    /*GLfloat light0_position[] = { 3.0, 3.0, 3.0, 0.0 };
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_position);*/
 }
 
 void GLWidget::resizeGL(int w, int h) {
@@ -100,6 +125,14 @@ void GLWidget::setApproximationPercent(int percent) {
     qreal diff = APPROXIMATION_MAX - APPROXIMATION_MIN;
     qreal one_perc = diff / 100;
     Approximation = APPROXIMATION_MIN + one_perc * percent;
+
+    updateGL();
+}
+
+void GLWidget::setLightPercent(int percent) {
+    qreal diff = LIGHT_MAX - LIGHT_MIN;
+    qreal one_perc = diff / 100;
+    lightIntensity = LIGHT_MIN + one_perc * percent;
 
     updateGL();
 }

@@ -13,6 +13,7 @@ public:
     void setHeightPercent(int percent);
     void setDiameterPercent(int percent);
     void setApproximationPercent(int percent);
+    void setLightPercent(int percent);
     void setPolyFillState(bool status);
     void animationRealize(void);
     void animationClear(void);
@@ -37,6 +38,7 @@ private:
     int Approximation;
     qreal functionLen;
     qreal heightParam;
+    qreal lightIntensity;
     qreal getFunctionValue(qreal x);
     QVector3D getVector(qreal pos_in, qreal angle);
     QVector3D getNormalZero(qreal pos_in);

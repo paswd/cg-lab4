@@ -31,6 +31,8 @@ private slots:
 
     void timerEvent();
 
+    void on_SliderLight_sliderMoved(int position);
+
 private:
     Ui::MainWindow *ui;
     QTimer *timer;
